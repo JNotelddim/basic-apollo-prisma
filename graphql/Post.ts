@@ -1,4 +1,4 @@
-import { extendType, objectType } from "nexus";
+import { extendType, nonNull, objectType, stringArg } from "nexus";
 import { NexusGenObjects } from "../../nexus-typegen";
 
 export const Post = objectType({
@@ -44,3 +44,32 @@ export const PostQuery = extendType({
         });
     },
 });
+
+export const PostMutation = extendType({  // 1
+    type: "Mutation",
+    definition(t) {
+        t.nonNull.field("post", {
+            type: "Post",
+            args: {
+                title: nonNull(stringArg()),
+                content: nonNull(stringArg()),
+            },
+            resolve(parent, args, context) {
+                const { title, content } = args
+
+                let idCount = posts.length + 1; 
+                const post = {
+                    id: `${idCount}`,
+                    createdAt: new Date().toISOString(),
+                    title,
+                    content,
+                    published: false,
+
+                };
+                posts.push(post);
+                return post;
+            },
+        });
+    },
+});
+
