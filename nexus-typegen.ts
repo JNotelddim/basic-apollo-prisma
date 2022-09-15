@@ -64,6 +64,7 @@ export interface NexusGenFieldTypes {
   }
   Query: { // field return type
     feed: NexusGenRootTypes['Post'][]; // [Post!]!
+    post: NexusGenRootTypes['Post']; // Post!
   }
 }
 
@@ -81,6 +82,7 @@ export interface NexusGenFieldTypeNames {
   }
   Query: { // field return type name
     feed: 'Post'
+    post: 'Post'
   }
 }
 
@@ -89,6 +91,11 @@ export interface NexusGenArgTypes {
     post: { // args
       content: string; // String!
       title: string; // String!
+    }
+  }
+  Query: {
+    post: { // args
+      id: string; // String!
     }
   }
 }

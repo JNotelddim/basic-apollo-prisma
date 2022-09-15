@@ -17,4 +17,5 @@ type Post {
 
 type Query {
   feed: [Post!]!
+  post(id: String!): Post!
 }

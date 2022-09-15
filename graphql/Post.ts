@@ -33,13 +33,36 @@ let posts: NexusGenObjects["Post"][]= [
     }
 ];
 
-export const PostQuery = extendType({
+export const FeedQuery = extendType({
     type: "Query",
     definition(t) {
         t.nonNull.list.nonNull.field("feed", {
             type: "Post",
             resolve(parent, args, context, info) {
                 return posts; // TODO: use prisma connection rather than hardcoded list
+            },
+        });
+    },
+});
+
+export const PostQuery = extendType({
+    type: "Query",
+    definition(t) {
+        t.nonNull.field("post", {
+            type: "Post",
+            args: {
+                id: nonNull(stringArg())
+            },
+            resolve(parent, args, context, info) {
+                const {id} = args;
+
+                const post = posts.find(post => post.id === id);
+                
+                if (post) {
+                    return post;
+                } else {
+                    throw new Error('Cannot find post');
+                }
             },
         });
     },
