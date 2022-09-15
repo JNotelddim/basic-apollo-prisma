@@ -1,4 +1,4 @@
-import { extendType, nonNull, objectType, stringArg } from "nexus";
+import { extendType, nonNull, objectType, stringArg, booleanArg } from "nexus";
 import { NexusGenObjects } from "../../nexus-typegen";
 
 export const Post = objectType({
@@ -68,10 +68,10 @@ export const PostQuery = extendType({
     },
 });
 
-export const PostMutation = extendType({  // 1
+export const CreatePostMutation = extendType({  // 1
     type: "Mutation",
     definition(t) {
-        t.nonNull.field("post", {
+        t.nonNull.field("createPost", {
             type: "Post",
             args: {
                 title: nonNull(stringArg()),
@@ -91,6 +91,41 @@ export const PostMutation = extendType({  // 1
                 };
                 posts.push(post);
                 return post;
+            },
+        });
+    },
+});
+
+export const UpdatePostMutation = extendType({  // 1
+    type: "Mutation",
+    definition(t) {
+        t.nonNull.field("updatePost", {
+            type: "Post",
+            args: {
+                id: nonNull(stringArg()),
+                title: stringArg(),
+                content: stringArg(),
+                published: booleanArg(),
+            },
+            resolve(parent, args, context) {
+                const { id, title, content, published } = args
+
+                const existingPost = posts.find(post => post.id === id);
+
+                if(!existingPost) {
+                        throw new Error('Could not find post.');
+                }
+
+                const updatedPost = {
+                    ...existingPost,
+                    updatedAt: new Date().toISOString(),
+                    title: title || existingPost.title,
+                    content: content || existingPost.content,
+                    published:  published !== undefined ? published : existingPost.published,
+
+                };
+                posts = [...posts.filter(post => post.id !== id), updatedPost];
+                return updatedPost;
             },
         });
     },
