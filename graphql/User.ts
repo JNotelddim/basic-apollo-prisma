@@ -1,4 +1,4 @@
-import { extendType, objectType } from "nexus";
+import { extendType, nonNull, objectType, stringArg } from "nexus";
 
 export const User = objectType({
     name: "User",
@@ -17,6 +17,31 @@ export const UsersQuery = extendType({
             resolve: async (parent, args, context, info) => {
                 const res = await context.prisma.user.findMany();
                 return res;
+            },
+        });
+    },
+});
+
+export const CreateUserMutation = extendType({
+    type: "Mutation",
+    definition(t) {
+        t.nonNull.field("createUser", {
+            type: "User",
+            args: {
+                email: nonNull(stringArg()),
+                name: stringArg(),
+            },
+            resolve: async (parent, args, context) =>  {
+                const { name, email } = args
+
+                const newUser = await context.prisma.user.create({
+                    data: {
+                        name,
+                        email
+                    },
+                });
+
+                return newUser;
             },
         });
     },
