@@ -5,7 +5,7 @@ const {
 } = require('apollo-server-core');
 
 
-import { schema } from "./schema";
+import { schema } from "./src/schema";
 export const server = new ApolloServer({
     schema,
 });
