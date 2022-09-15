@@ -4,7 +4,7 @@
  */
 
 
-
+import type { Context } from "./context"
 
 
 
@@ -33,14 +33,25 @@ export interface NexusGenObjects {
   }
   Mutation: {};
   Post: { // root type
-    content: string; // String!
+    author: NexusGenRootTypes['User']; // User!
+    content?: string | null; // String
     createdAt: string; // String!
-    id: string; // String!
+    id: number; // Int!
     published: boolean; // Boolean!
     title: string; // String!
     updatedAt?: string | null; // String
   }
+  Profile: { // root type
+    bio?: string | null; // String
+    id: number; // Int!
+    user: NexusGenRootTypes['User']; // User!
+  }
   Query: {};
+  User: { // root type
+    email: string; // String!
+    id: number; // Int!
+    name?: string | null; // String
+  }
 }
 
 export interface NexusGenInterfaces {
@@ -63,16 +74,27 @@ export interface NexusGenFieldTypes {
     updatePost: NexusGenRootTypes['Post']; // Post!
   }
   Post: { // field return type
-    content: string; // String!
+    author: NexusGenRootTypes['User']; // User!
+    content: string | null; // String
     createdAt: string; // String!
-    id: string; // String!
+    id: number; // Int!
     published: boolean; // Boolean!
     title: string; // String!
     updatedAt: string | null; // String
   }
+  Profile: { // field return type
+    bio: string | null; // String
+    id: number; // Int!
+    user: NexusGenRootTypes['User']; // User!
+  }
   Query: { // field return type
     feed: NexusGenRootTypes['Post'][]; // [Post!]!
     post: NexusGenRootTypes['Post']; // Post!
+  }
+  User: { // field return type
+    email: string; // String!
+    id: number; // Int!
+    name: string | null; // String
   }
 }
 
@@ -86,16 +108,27 @@ export interface NexusGenFieldTypeNames {
     updatePost: 'Post'
   }
   Post: { // field return type name
+    author: 'User'
     content: 'String'
     createdAt: 'String'
-    id: 'String'
+    id: 'Int'
     published: 'Boolean'
     title: 'String'
     updatedAt: 'String'
   }
+  Profile: { // field return type name
+    bio: 'String'
+    id: 'Int'
+    user: 'User'
+  }
   Query: { // field return type name
     feed: 'Post'
     post: 'Post'
+  }
+  User: { // field return type name
+    email: 'String'
+    id: 'Int'
+    name: 'String'
   }
 }
 
@@ -106,18 +139,18 @@ export interface NexusGenArgTypes {
       title: string; // String!
     }
     deletePost: { // args
-      id: string; // String!
+      id: number; // Int!
     }
     updatePost: { // args
       content?: string | null; // String
-      id: string; // String!
+      id: number; // Int!
       published?: boolean | null; // Boolean
       title?: string | null; // String
     }
   }
   Query: {
     post: { // args
-      id: string; // String!
+      id: number; // Int!
     }
   }
 }
@@ -153,7 +186,7 @@ export type NexusGenFeaturesConfig = {
 }
 
 export interface NexusGenTypes {
-  context: any;
+  context: Context;
   inputTypes: NexusGenInputs;
   rootTypes: NexusGenRootTypes;
   inputTypeShapes: NexusGenInputs & NexusGenEnums & NexusGenScalars;
