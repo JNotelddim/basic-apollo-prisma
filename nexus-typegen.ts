@@ -59,7 +59,7 @@ export interface NexusGenFieldTypes {
     updatedAt: string | null; // String
   }
   Query: { // field return type
-    ok: boolean; // Boolean!
+    feed: NexusGenRootTypes['Post'][]; // [Post!]!
   }
 }
 
@@ -73,7 +73,7 @@ export interface NexusGenFieldTypeNames {
     updatedAt: 'String'
   }
   Query: { // field return type name
-    ok: 'Boolean'
+    feed: 'Post'
   }
 }
 
