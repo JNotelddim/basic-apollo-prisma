@@ -31,6 +31,7 @@ type Profile {
 type Query {
   feed: [Post!]!
   post(id: Int!): Post!
+  users: [User!]!
 }
 
 type User {

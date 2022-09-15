@@ -90,6 +90,7 @@ export interface NexusGenFieldTypes {
   Query: { // field return type
     feed: NexusGenRootTypes['Post'][]; // [Post!]!
     post: NexusGenRootTypes['Post']; // Post!
+    users: NexusGenRootTypes['User'][]; // [User!]!
   }
   User: { // field return type
     email: string; // String!
@@ -124,6 +125,7 @@ export interface NexusGenFieldTypeNames {
   Query: { // field return type name
     feed: 'Post'
     post: 'Post'
+    users: 'User'
   }
   User: { // field return type name
     email: 'String'
