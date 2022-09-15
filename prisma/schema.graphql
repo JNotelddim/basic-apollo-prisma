@@ -2,6 +2,15 @@
 ### Do not make changes to this file directly
 
 
+type Post {
+  content: String!
+  createdAt: String!
+  id: String!
+  published: Boolean!
+  title: String!
+  updatedAt: String
+}
+
 type Query {
   ok: Boolean!
 }
