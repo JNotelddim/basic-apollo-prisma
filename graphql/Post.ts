@@ -1,6 +1,13 @@
 import { extendType, nonNull, objectType, stringArg, booleanArg } from "nexus";
 import { NexusGenObjects } from "../../nexus-typegen";
 
+export const DeleteResult = objectType({
+    name: "DeleteResult",
+    definition(t) {
+        t.nonNull.boolean("success");
+    },
+});
+
 export const Post = objectType({
     name: "Post",
     definition(t) {
@@ -126,6 +133,30 @@ export const UpdatePostMutation = extendType({  // 1
                 };
                 posts = [...posts.filter(post => post.id !== id), updatedPost];
                 return updatedPost;
+            },
+        });
+    },
+});
+
+export const DeletePostMutation = extendType({  // 1
+    type: "Mutation",
+    definition(t) {
+        t.nonNull.field("deletePost", {
+            type: "DeleteResult",
+            args: {
+                id: nonNull(stringArg()),
+            },
+            resolve(parent, args, context) {
+                const { id } = args
+
+                const existingPost = posts.find(post => post.id === id);
+
+                if(!existingPost) {
+                    return { success: false };
+                }
+
+                posts = posts.filter(post => post.id !== id);
+                return { success: true };
             },
         });
     },
