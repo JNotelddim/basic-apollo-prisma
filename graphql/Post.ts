@@ -1,5 +1,6 @@
-import { extendType, nonNull, objectType, stringArg, booleanArg } from "nexus";
-import { NexusGenObjects } from "../../nexus-typegen";
+import { extendType, nonNull, objectType, stringArg, booleanArg, intArg } from "nexus";
+
+import { User } from './User';
 
 export const DeleteResult = objectType({
     name: "DeleteResult",
@@ -11,42 +12,27 @@ export const DeleteResult = objectType({
 export const Post = objectType({
     name: "Post",
     definition(t) {
-        t.nonNull.string("id");
+        t.nonNull.int("id");
         t.nonNull.string("createdAt");
         t.string("updatedAt");
         t.nonNull.string("title");
-        t.nonNull.string("content");
+        t.string("content");
         t.nonNull.boolean("published");
-        // t.nonNull.string("author");
+        t.nonNull.field('author', {
+            type: User 
+        })
     },
 });
-
-let posts: NexusGenObjects["Post"][]= [
-    {
-        id: '1',
-        createdAt: '2022-02-17T13:01:11Z',
-        updatedAt: '2022-02-17T13:32:09Z',
-        title: 'First Post :)',
-        content: 'This is my first post',
-        published: true,
-    },
-    {
-        id: '2',
-        createdAt: '2022-02-18T13:01:11Z',
-        updatedAt: null,
-        title: 'Software Development Post',
-        content: 'This is a post about software development.',
-        published: false,
-    }
-];
 
 export const FeedQuery = extendType({
     type: "Query",
     definition(t) {
         t.nonNull.list.nonNull.field("feed", {
             type: "Post",
-            resolve(parent, args, context, info) {
-                return posts; // TODO: use prisma connection rather than hardcoded list
+            resolve: async (parent, args, context, info) => {
+                const res = await context.prisma.post.findMany();
+                console.log({ res});
+                return res;
             },
         });
     },
@@ -58,12 +44,16 @@ export const PostQuery = extendType({
         t.nonNull.field("post", {
             type: "Post",
             args: {
-                id: nonNull(stringArg())
+                id: nonNull(intArg())
             },
-            resolve(parent, args, context, info) {
-                const {id} = args;
+            resolve: async (parent, args, context, info) => {
+                const { id } = args;
 
-                const post = posts.find(post => post.id === id);
+                const post = await context.prisma.post.findUnique({
+                    where: {
+                        id,
+                    },
+                });
                 
                 if (post) {
                     return post;
@@ -75,7 +65,7 @@ export const PostQuery = extendType({
     },
 });
 
-export const CreatePostMutation = extendType({  // 1
+export const CreatePostMutation = extendType({
     type: "Mutation",
     definition(t) {
         t.nonNull.field("createPost", {
@@ -84,79 +74,87 @@ export const CreatePostMutation = extendType({  // 1
                 title: nonNull(stringArg()),
                 content: nonNull(stringArg()),
             },
-            resolve(parent, args, context) {
+            resolve: async (parent, args, context) =>  {
                 const { title, content } = args
 
-                let idCount = posts.length + 1; 
-                const post = {
-                    id: `${idCount}`,
-                    createdAt: new Date().toISOString(),
-                    title,
-                    content,
-                    published: false,
+                const newPost = await context.prisma.post.create({
+                    data: {
+                        createdAt: new Date().toISOString(),
+                        title,
+                        content,
+                        published: false,
+                    },
+                });
 
-                };
-                posts.push(post);
-                return post;
+                return newPost;
             },
         });
     },
 });
 
-export const UpdatePostMutation = extendType({  // 1
+export const UpdatePostMutation = extendType({
     type: "Mutation",
     definition(t) {
         t.nonNull.field("updatePost", {
             type: "Post",
             args: {
-                id: nonNull(stringArg()),
+                id: nonNull(intArg()),
                 title: stringArg(),
                 content: stringArg(),
                 published: booleanArg(),
             },
-            resolve(parent, args, context) {
+            resolve: async (parent, args, context) => {
                 const { id, title, content, published } = args
 
-                const existingPost = posts.find(post => post.id === id);
+                const existingPost = await context.prisma.post.findUnique({
+                    where: {
+                        id,
+                    },
+                });
 
                 if(!existingPost) {
-                        throw new Error('Could not find post.');
+                    throw new Error('Bad Request');
                 }
 
-                const updatedPost = {
-                    ...existingPost,
-                    updatedAt: new Date().toISOString(),
-                    title: title || existingPost.title,
-                    content: content || existingPost.content,
-                    published:  published !== undefined ? published : existingPost.published,
+                const updatedPost = await context.prisma.post.update({
+                    where: {
+                        id,
+                    },
+                    data: {
+                        updatedAt: new Date().toISOString(),
+                        title: title || existingPost.title,
+                        content: content || existingPost.content,
+                        published:  published !== undefined ? published : existingPost.published,
+                    },
+                });
 
-                };
-                posts = [...posts.filter(post => post.id !== id), updatedPost];
                 return updatedPost;
             },
         });
     },
 });
 
-export const DeletePostMutation = extendType({  // 1
+export const DeletePostMutation = extendType({
     type: "Mutation",
     definition(t) {
         t.nonNull.field("deletePost", {
             type: "DeleteResult",
             args: {
-                id: nonNull(stringArg()),
+                id: nonNull(intArg()),
             },
-            resolve(parent, args, context) {
+            resolve: async (parent, args, context) =>  {
                 const { id } = args
 
-                const existingPost = posts.find(post => post.id === id);
-
-                if(!existingPost) {
-                    return { success: false };
+                try {
+                    context.prisma.post.delete({
+                        where: {
+                            id
+                        }, 
+                    });
+                    return { success: true };
+                } catch (e) {
+                    return {success: false};
                 }
-
-                posts = posts.filter(post => post.id !== id);
-                return { success: true };
             },
         });
     },

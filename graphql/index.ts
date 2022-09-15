@@ -1,2 +1,4 @@
-export * from './Post.ts';
+export * from './Profile';
+export * from './Post';
+export * from './User';
 
